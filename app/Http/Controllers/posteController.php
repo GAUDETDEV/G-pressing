@@ -28,7 +28,7 @@ class posteController extends Controller
 
         $id_user_auth = Auth::id();
 
-        $liste_poste = DB::table('postes')->get();
+        $liste_poste = DB::table('postes')->where("id_user_auth","=",Auth::id())->get();
 
         $count = count($liste_poste);
 

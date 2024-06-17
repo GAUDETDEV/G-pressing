@@ -81,7 +81,7 @@ class setpController extends Controller
 
             }
 
-            return view("setps/employers/receptionists/liste",[
+            return view("setps/clients/liste",[
                 "liste_factures" => $liste_factures,
             ]);
 
@@ -90,6 +90,7 @@ class setpController extends Controller
 
 
     }
+
 
 
     public function voirSetp(Facture $liste_facture):View{

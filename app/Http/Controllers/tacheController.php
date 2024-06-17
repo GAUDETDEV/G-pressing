@@ -145,72 +145,105 @@ class tacheController extends Controller
         if($tache->etat_tache == "En attente" and $tache->fin_tache >= $today){
 
 
-            $tache->etat_tache = $request->etat_tache;
+            if($tache->type_tache == "reception"){
 
-            if($facture->etat_traitement == "Depot"){
+                $tache->etat_tache = $request->etat_tache;
 
-                DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Lavage"]);
+                $tache -> save();
 
-            }elseif($facture->etat_traitement == "Lavage" and $facture->id_service == ""){
-
-                DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Repassage"]);
+                return redirect()->route("detailAllTache",['tache' => $tache -> id])->with("message", "Tâche marquée comme terminer!");
 
 
-            }elseif($facture->etat_traitement == "Lavage" and $facture->id_service !== "" and $facture->etat_livraison == "Oui"){
+            }else{
 
-                DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Fin"]);
+                $tache->etat_tache = $request->etat_tache;
 
-            }elseif($facture->etat_traitement == "Repassage" and $facture->id_service == ""){
+                if($facture->etat_traitement == "Depot"){
 
-                if($facture->etat_livraison == "Oui"){
+                    DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Lavage"]);
 
-                    DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Fin"]);
+                }elseif($facture->etat_traitement == "Lavage" and $facture->id_service == ""){
 
-                }
-
-                if($facture->etat_livraison == "Non"){
-
-                    DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Stockage"]);
-
-                }
+                    DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Repassage"]);
 
 
-            }elseif($facture->etat_traitement == "Repassage" and $facture->id_service !== ""){
-
-                if($facture->etat_livraison == "Oui"){
+                }elseif($facture->etat_traitement == "Lavage" and $facture->id_service !== "" and $facture->etat_livraison == "Oui"){
 
                     DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Fin"]);
 
+                }elseif($facture->etat_traitement == "Repassage" and $facture->id_service == ""){
+
+                    if($facture->etat_livraison == "Oui"){
+
+                        DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Fin"]);
+
+                    }
+
+                    if($facture->etat_livraison == "Non"){
+
+                        DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Stockage"]);
+
+                    }
+
+
+                }elseif($facture->etat_traitement == "Repassage" and $facture->id_service !== ""){
+
+                    if($facture->etat_livraison == "Oui"){
+
+                        DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Fin"]);
+
+                    }
+
+                    if($facture->etat_livraison == "Non"){
+
+                        DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Stockage"]);
+
+                    }
+
+
                 }
 
-                if($facture->etat_livraison == "Non"){
 
-                    DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Stockage"]);
+                $tache -> save();
 
-                }
+
+                return redirect()->route("detailAllTache",['tache' => $tache -> id])->with("message", "Tâche marquée comme terminer!");
 
 
             }
 
 
-            $tache -> save();
-
-
-            return redirect()->route("detailAllTache",['tache' => $tache -> id])->with("message", "Tâche marquée comme terminer!");
-
         }
+
 
         if($tache->etat_tache == "Terminée"){
 
             if($tache->fin_tache > $today){
 
-                return redirect()->route("detailAllTache",['tache' => $tache -> id])->with("message", "Tâche déjà marquée comme terminer!");
+                if($tache->type_tache == "reception"){
+
+                    return redirect()->route("detailAllTache",['tache' => $tache -> id])->with("message", "Tâche déjà marquée comme terminer!");
+
+                }else{
+
+                    return redirect()->route("detailAllTache",['tache' => $tache -> id])->with("message", "Tâche déjà marquée comme terminer!");
+
+                }
 
             }
 
             if($tache->fin_tache <= $today){
 
-                return redirect()->route("detailAllTache",['tache' => $tache -> id])->with("message", "Tâche déjà marquée comme terminer!");
+                if($tache->type_tache == "reception"){
+
+                    return redirect()->route("detailAllTache",['tache' => $tache -> id])->with("message", "Tâche déjà marquée comme terminer!");
+
+                }else{
+
+                    return redirect()->route("detailAllTache",['tache' => $tache -> id])->with("message", "Tâche déjà marquée comme terminer!");
+
+                }
+
 
             }
 
@@ -223,6 +256,7 @@ class tacheController extends Controller
 
     public function marquerMyTache(Tache $tache, Request $request){
 
+        $infos_user = DB::table("users")->where("id","=",Auth::id())->first();
 
         $today = date("Y-m-d");
 
@@ -231,72 +265,104 @@ class tacheController extends Controller
         if($tache->etat_tache == "En attente" and $tache->fin_tache >= $today){
 
 
-            $tache->etat_tache = $request->etat_tache;
+            if($infos_user->role == "receptionniste"){
 
-            if($facture->etat_traitement == "Depot"){
+                $tache->etat_tache = $request->etat_tache;
 
-                DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Lavage"]);
+                $tache -> save();
 
-            }elseif($facture->etat_traitement == "Lavage" and $facture->id_service == ""){
-
-                DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Repassage"]);
+                return redirect()->route("detailMyTache",['tache' => $tache -> id])->with("message", "Tâche marquée comme terminer!");
 
 
-            }elseif($facture->etat_traitement == "Lavage" and $facture->id_service !== "" and $facture->etat_livraison == "Oui"){
-
-                DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Fin"]);
-
-            }elseif($facture->etat_traitement == "Repassage" and $facture->id_service == ""){
-
-                if($facture->etat_livraison == "Oui"){
-
-                    DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Fin"]);
-
-                }
-
-                if($facture->etat_livraison == "Non"){
-
-                    DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Stockage"]);
-
-                }
+            }elseif($infos_user->role == "laveur" or $infos_user->role == "repasseur" or $infos_user->role == "livreur"){
 
 
-            }elseif($facture->etat_traitement == "Repassage" and $facture->id_service !== ""){
+                $tache->etat_tache = $request->etat_tache;
 
-                if($facture->etat_livraison == "Oui"){
+                if($facture->etat_traitement == "Depot"){
+
+                    DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Lavage"]);
+
+                }elseif($facture->etat_traitement == "Lavage" and $facture->id_service == ""){
+
+                    DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Repassage"]);
+
+
+                }elseif($facture->etat_traitement == "Lavage" and $facture->id_service !== "" and $facture->etat_livraison == "Oui"){
 
                     DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Fin"]);
 
+                }elseif($facture->etat_traitement == "Repassage" and $facture->id_service == ""){
+
+                    if($facture->etat_livraison == "Oui"){
+
+                        DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Fin"]);
+
+                    }
+
+                    if($facture->etat_livraison == "Non"){
+
+                        DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Stockage"]);
+
+                    }
+
+
+                }elseif($facture->etat_traitement == "Repassage" and $facture->id_service !== ""){
+
+                    if($facture->etat_livraison == "Oui"){
+
+                        DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Fin"]);
+
+                    }
+
+                    if($facture->etat_livraison == "Non"){
+
+                        DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Stockage"]);
+
+                    }
+
+
                 }
 
-                if($facture->etat_livraison == "Non"){
+                $tache -> save();
 
-                    DB::table('factures')->where("id","=",$tache->id_facture)->update(['etat_traitement' => "Stockage"]);
-
-                }
+                return redirect()->route("detailMyTache",['tache' => $tache -> id])->with("message", "Tâche marquée comme terminer!");
 
 
             }
 
 
-            $tache -> save();
-
-
-            return redirect()->route("detailMyTache",['tache' => $tache -> id])->with("message", "Tâche marquée comme terminer!");
-
         }
+
 
         if($tache->etat_tache == "Terminée"){
 
             if($tache->fin_tache > $today){
 
-                return redirect()->route("detailMyTache",['tache' => $tache -> id])->with("message", "Tâche déjà marquée comme terminer!");
+                if($infos_user->role == "receptionniste"){
+
+                    return redirect()->route("detailMyTache",['tache' => $tache -> id])->with("message", "Tâche déjà marquée comme terminer!");
+
+                }elseif($infos_user->role == "laveur" or $infos_user->role == "repasseur" or $infos_user->role == "livreur"){
+
+                    return redirect()->route("detailMyTache",['tache' => $tache -> id])->with("message", "Tâche déjà marquée comme terminer!");
+
+                }
+
 
             }
 
             if($tache->fin_tache <= $today){
 
-                return redirect()->route("detailMyTache",['tache' => $tache -> id])->with("message", "Tâche déjà marquée comme terminer!");
+                if($infos_user->role == "receptionniste"){
+
+                    return redirect()->route("detailMyTache",['tache' => $tache -> id])->with("message", "Tâche déjà marquée comme terminer!");
+
+                }elseif($infos_user->role == "laveur" or $infos_user->role == "repasseur" or $infos_user->role == "livreur"){
+
+                    return redirect()->route("detailMyTache",['tache' => $tache -> id])->with("message", "Tâche déjà marquée comme terminer!");
+
+                }
 
             }
 

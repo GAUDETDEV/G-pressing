@@ -6,7 +6,7 @@
 <div class="mt-5">
 
     @if ($facture->statut_facture and $facture->etat_livraison == "Non")
-        <a type="button" class="btn" href="{{route('s',['facture' => $facture])}}" style='color: rgb(255, 255, 255); background-color: rgb(5, 5, 5); margin: 5px;'>Reçu en PDF</a>
+        <a type="button" class="btn" href="{{route('generatePdf',['facture' => $facture])}}" style='color: rgb(255, 255, 255); background-color: rgb(5, 5, 5); margin: 5px;'>Reçu en PDF</a>
     @elseif ($facture->statut_facture and $infos_livraison)
         <a type="button" class="btn" href="{{route('generatePdf',['facture' => $facture])}}" style='color: rgb(255, 255, 255); background-color: rgb(5, 5, 5); margin: 5px;'>Reçu en PDF</a>
     @endif
